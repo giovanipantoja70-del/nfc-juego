@@ -3,43 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Jump Game</title>
+<title>Jump Game Mario</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;touch-action:manipulation}
-#menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;position:relative;z-index:10;background:#1a1a2e;overflow-y:auto}
+#menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:18px;position:relative;z-index:10;background:#1a1a2e;overflow-y:auto}
 #menu h1{font-size:2.15em;margin-bottom:6px;color:#e94560}
-#menu p.sub{font-size:0.95em;margin-bottom:18px;color:#aaa}
-#menu input{width:80%;max-width:280px;padding:13px 18px;font-size:1.08em;border:2px solid #e94560;border-radius:12px;background:transparent;color:#fff;outline:none;text-align:center;margin-bottom:16px}
-button{padding:13px 46px;font-size:1.15em;border:none;border-radius:12px;background:#e94560;color:#fff;cursor:pointer;font-weight:bold}
+#menu p.sub{font-size:0.92em;margin-bottom:12px;color:#aaa}
+#menu input{width:80%;max-width:280px;padding:13px 18px;font-size:1.08em;border:2px solid #e94560;border-radius:12px;background:transparent;color:#fff;outline:none;text-align:center;margin-bottom:14px}
+button{padding:13px 46px;font-size:1.12em;border:none;border-radius:12px;background:#e94560;color:#fff;cursor:pointer;font-weight:bold}
 button:active{transform:scale(0.97)}
 #gameCanvas{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh}
-#hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);font-size:1.05em;font-weight:bold;color:#fff;z-index:5;text-shadow:0 2px 4px rgba(0,0,0,.7);display:none;gap:10px}
-#hud span{margin:0 6px}
+#hud{position:fixed;top:10px;left:50%;transform:translateX(-50%);font-size:.95em;font-weight:bold;color:#fff;z-index:5;text-shadow:0 2px 4px rgba(0,0,0,.7);display:none;white-space:nowrap}
 #gameOver{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:rgba(0,0,0,.84);position:fixed;top:0;left:0;width:100vw;z-index:20;padding:20px;overflow-y:auto}
 #gameOver h1{font-size:1.9em;color:#e94560;margin-bottom:8px}
-#gameOver .score{font-size:1.7em;color:#ffd700;font-weight:bold;margin-bottom:12px}
-#instructions{font-size:.82em;color:#888;margin-top:10px}
-.ranking{width:100%;max-width:320px;margin:14px 0;background:rgba(255,255,255,.06);border:1px solid rgba(233,69,96,.3);border-radius:12px;padding:12px}
-.ranking h3{font-size:.95em;color:#e94560;margin-bottom:8px;text-align:center}
+#gameOver .score{font-size:1.55em;color:#ffd700;font-weight:bold;margin-bottom:8px}
+.ranking{width:100%;max-width:320px;margin:12px 0;background:rgba(255,255,255,.06);border:1px solid rgba(233,69,96,.3);border-radius:12px;padding:12px}
+.ranking h3{font-size:.92em;color:#e94560;margin-bottom:8px;text-align:center}
 .ranking ol{list-style:none;padding:0}
-.ranking li{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:.9em}
+.ranking li{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:.88em}
 .ranking li.me{background:rgba(233,69,96,.18);font-weight:bold}
 .ranking li:nth-child(1){color:#ffd700}
-.ranking li:nth-child(2){color:#c0c0c0}
-.ranking li:nth-child(3){color:#cd7f32}
-.small{font-size:.78em;color:#777;margin-top:6px}
+#instructions{font-size:.78em;color:#888;margin-top:8px;line-height:1.4}
+.small{font-size:.75em;color:#777;margin-top:6px}
+.coin-hud{color:#ffd700}
 </style>
 </head>
 <body>
 <div id="menu">
-  <h1>🏃 Salta Obstaculos</h1>
-  <p class="sub">¡Doble salto activado! Toca 2 veces en el aire</p>
+  <h1>🏃🍄 Salta Obstaculos</h1>
+  <p class="sub">Mantén presionado para flotar • Doble salto • Monedas Mario</p>
   <input type="text" id="nameInput" placeholder="Tu nombre" maxlength="15" autocomplete="off">
   <button id="playBtn">¡Jugar!</button>
-  <div id="instructions">Toca la pantalla o espacio para saltar (2 saltos)</div>
+  <div id="instructions">Toque corto = salto | Mantener presionado = flotas en el aire<br>Solo sumas metros en el suelo • Atrapa 🪙 para +10pts</div>
   <div class="ranking" id="menuRanking"></div>
-  <div class="small">Sonido al saltar 🔊 • Ranking guardado en este celular</div>
+  <div class="small">Sonido 🔊 • Flota estilo Peach • Recompensas Mario</div>
 </div>
 <canvas id="gameCanvas"></canvas>
 <div id="hud"></div>
@@ -47,6 +45,7 @@ button:active{transform:scale(0.97)}
   <h1>Game Over!</h1>
   <p>Jugador: <span id="goName"></span></p>
   <p class="score" id="goScore"></p>
+  <p id="goCoins" style="color:#ffd700"></p>
   <div class="ranking" id="goRanking"></div>
   <button id="restartBtn">Jugar de nuevo</button>
   <button id="menuBtn" style="margin-top:10px;background:transparent;border:2px solid #e94560">Menu</button>
@@ -59,152 +58,131 @@ const hud=document.getElementById('hud');
 const gameOverScreen=document.getElementById('gameOver');
 const goName=document.getElementById('goName');
 const goScore=document.getElementById('goScore');
+const goCoins=document.getElementById('goCoins');
 const nameInput=document.getElementById('nameInput');
 const playBtn=document.getElementById('playBtn');
 const restartBtn=document.getElementById('restartBtn');
 const menuBtn=document.getElementById('menuBtn');
 const menuRanking=document.getElementById('menuRanking');
 const goRanking=document.getElementById('goRanking');
-let W,H,player,obstacles=[],score=0,gameRunning=false,animId,speed=5,obstaclesPassed=0;
-const GRAVITY=0.45,JUMP_FORCE=-15.2,DOUBLE_JUMP_FORCE=-14.5,GROUND_RATIO=0.15,MAX_JUMPS=2;
+let W,H,player,obstacles=[],coins=[],score=0,coinsCollected=0,gameRunning=false,animId,speed=3.6,obstaclesPassed=0,holding=false;
+const GRAVITY=0.45,HOVER_GRAVITY=0.18,JUMP_FORCE=-15.2,DOUBLE_JUMP_FORCE=-14.5,GROUND_RATIO=0.15,MAX_JUMPS=2;
 
-// --- Sonido ---
 let audioCtx;
 function getAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
-function playJumpSound(doubleB=false){
-  try{
-    const ac=getAudio();
-    const o=ac.createOscillator(),g=ac.createGain();
-    o.type='sine'; o.frequency.value= doubleB ? 520 : 380;
-    o.connect(g); g.connect(ac.destination);
-    g.gain.value=0.18;
-    o.start();
-    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.22);
-    o.frequency.exponentialRampToValueAtTime(doubleB? 880: 620, ac.currentTime+0.12);
-    o.stop(ac.currentTime+0.23);
-  }catch(e){}
-}
-function playHitSound(){
-  try{
-    const ac=getAudio();
-    const o=ac.createOscillator(),g=ac.createGain();
-    o.type='square'; o.frequency.value=180;
-    o.connect(g); g.connect(ac.destination);
-    g.gain.value=0.2; o.start();
-    o.frequency.linearRampToValueAtTime(70, ac.currentTime+0.25);
-    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.3);
-    o.stop(ac.currentTime+0.32);
-  }catch(e){}
-}
+function playJumpSound(d){try{const ac=getAudio(),o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=d?520:380;o.connect(g);g.connect(ac.destination);g.gain.value=0.18;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.22);o.frequency.exponentialRampToValueAtTime(d?880:620,ac.currentTime+0.12);o.stop(ac.currentTime+0.23)}catch(e){}}
+function playCoin(){try{const ac=getAudio();[659,880].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.value=0.15;const t=ac.currentTime+i*0.09;o.start(t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.stop(t+0.2)})}catch(e){}}
+function playHit(){try{const ac=getAudio(),o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=180;o.connect(g);g.connect(ac.destination);g.gain.value=0.2;o.start();o.frequency.linearRampToValueAtTime(70,ac.currentTime+0.25);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.stop(ac.currentTime+0.32)}catch(e){}}
 
-// --- Ranking localStorage ---
 const STORE_KEY='nfc_juego_ranking_v2';
 function loadRanking(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]')}catch{return []}}
 function saveScore(name, sc){
   const list=loadRanking();
   list.push({name:name, score:Math.floor(sc), date:Date.now()});
-  // mantener solo el mejor por nombre
   const map=new Map();
-  for(const e of list){
-    const cur=map.get(e.name);
-    if(!cur || e.score>cur.score) map.set(e.name,e);
-  }
+  for(const e of list){const cur=map.get(e.name); if(!cur||e.score>cur.score) map.set(e.name,e)}
   const best=[...map.values()].sort((a,b)=>b.score-a.score).slice(0,10);
-  localStorage.setItem(STORE_KEY, JSON.stringify(best));
-  return best;
+  localStorage.setItem(STORE_KEY, JSON.stringify(best)); return best;
 }
-function renderRanking(container, highlightName){
+function renderRanking(container, hl){
   const list=loadRanking();
-  if(list.length===0){container.innerHTML='<h3>🏆 Ranking</h3><p style="color:#777;font-size:.85em">Aun sin partidas</p>'; return;}
-  let html='<h3>🏆 Top 10</h3><ol>';
-  list.forEach((e,i)=>{
-    const cls=e.name===highlightName?' class="me"':'';
-    html+=`<li${cls}><span>${i+1}. ${e.name}</span><span>${e.score}m</span></li>`;
-  });
-  html+='</ol>';
-  container.innerHTML=html;
+  if(list.length===0){container.innerHTML='<h3>🏆 Ranking</h3><p style="color:#777;font-size:.85em">Aun sin partidas</p>';return}
+  let h='<h3>🏆 Top 10</h3><ol>'; list.forEach((e,i)=>{h+=`<li${e.name===hl?' class="me"':''}><span>${i+1}. ${e.name}</span><span>${e.score}m</span></li>`}); h+='</ol>'; container.innerHTML=h;
 }
-
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
-resize();window.addEventListener('resize',resize);
-renderRanking(menuRanking);
+resize();window.addEventListener('resize',resize); renderRanking(menuRanking);
 
-function initGame(playerName){
-  resize();
-  player={x:W*0.15,y:H*(1-GROUND_RATIO)-45,w:35,h:45,vy:0,grounded:true,jumps:0,name:playerName};
-  obstacles=[];score=0;speed=5;obstaclesPassed=0;
-  gameOverScreen.style.display='none';
-  menu.style.display='none';
-  canvas.style.display='block';
-  hud.style.display='block';
-  hud.textContent=player.name+' - 0m';
-  getAudio(); // desbloquear audio en gesto de usuario
-  drawBg();drawPlayer();
+function initGame(n){
+  resize(); player={x:W*0.15,y:H*(1-GROUND_RATIO)-45,w:34,h:42,vy:0,grounded:true,jumps:0,name:n};
+  obstacles=[];coins=[];score=0;coinsCollected=0;speed=3.6;obstaclesPassed=0;holding=false;
+  gameOverScreen.style.display='none'; menu.style.display='none'; canvas.style.display='block'; hud.style.display='block';
+  updateHud(); getAudio(); drawBg();drawPlayer();
 }
+function updateHud(){ hud.innerHTML = `${player.name} - ${Math.floor(score)}m <span class="coin-hud">🪙 ${coinsCollected}</span> ${!player.grounded && holding ? ' ☁️ flotando' : ''}`; }
 function drawBg(){
-  const grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'#1a1a2e');grad.addColorStop(1,'#16213e');
+  const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,'#1a1a2e');grad.addColorStop(1,'#16213e');
   ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
-  const groundY=H*(1-GROUND_RATIO);
-  ctx.fillStyle='#0f3460';ctx.fillRect(0,groundY,W,H-groundY);
-  ctx.fillStyle='#e94560';ctx.fillRect(0,groundY,W,4);
-  ctx.fillStyle='#1f2d45';ctx.beginPath();ctx.moveTo(0,groundY);
-  for(let i=0;i<=W;i+=40){ctx.lineTo(i,groundY-30-Math.sin(i*0.01)*25-Math.sin(i*0.025)*15)}
-  ctx.lineTo(W,groundY);ctx.fill();
+  const gy=H*(1-GROUND_RATIO);
+  ctx.fillStyle='#0f3460';ctx.fillRect(0,gy,W,H-gy); ctx.fillStyle='#e94560';ctx.fillRect(0,gy,W,4);
+  ctx.fillStyle='#1f2d45';ctx.beginPath();ctx.moveTo(0,gy);for(let i=0;i<=W;i+=40) ctx.lineTo(i,gy-30-Math.sin(i*0.01)*25-Math.sin(i*0.025)*15); ctx.lineTo(W,gy);ctx.fill();
+  // nubes
+  ctx.fillStyle='rgba(255,255,255,.08)'; for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse((W*0.3+i*W*0.35+score*0.5)%W, 80+i*40, 50,18,0,0,Math.PI*2);ctx.fill()}
 }
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
 function drawPlayer(){
-  ctx.fillStyle='#e94560';roundRect(player.x,player.y,player.w,player.h,8);ctx.fill();
-  // indicar doble salto disponible con puntito
-  if(player.jumps===1){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(player.x+player.w/2,player.y-8,4,0,Math.PI*2);ctx.fill();}
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.x+player.w*0.62,player.y+13,6,0,Math.PI*2);ctx.arc(player.x+player.w*0.85,player.y+13,6,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(player.x+player.w*0.64,player.y+13,2.5,0,Math.PI*2);ctx.arc(player.x+player.w*0.87,player.y+13,2.5,0,Math.PI*2);ctx.fill();
+  // sombra de flotar
+  if(!player.grounded && holding){ctx.fillStyle='rgba(255,215,0,.25)';ctx.beginPath();ctx.ellipse(player.x+player.w/2, player.y+player.h+6, 18,6,0,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle= player.grounded ? '#e94560' : '#ff6b81'; roundRect(player.x,player.y,player.w,player.h,8);ctx.fill();
+  if(player.jumps===1){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(player.x+player.w/2,player.y-7,4,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.x+player.w*0.62,player.y+12,5,0,Math.PI*2);ctx.arc(player.x+player.w*0.85,player.y+12,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(player.x+player.w*0.64,player.y+12,2.2,0,Math.PI*2);ctx.arc(player.x+player.w*0.87,player.y+12,2.2,0,Math.PI*2);ctx.fill();
+  if(!player.grounded && holding){ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='10px Arial';ctx.fillText('☁️', player.x+player.w+4, player.y+10)}
 }
-function drawObstacles(){
-  obstacles.forEach(o=>{
-    if(o.type==='spike'){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.moveTo(o.x,o.y+o.h);ctx.lineTo(o.x+o.w/2,o.y);ctx.lineTo(o.x+o.w,o.y+o.h);ctx.fill()}
-    else{ctx.fillStyle='#0f3460';ctx.strokeStyle='#e94560';ctx.lineWidth=3;roundRect(o.x,o.y,o.w,o.h,6);ctx.fill();ctx.stroke();ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(o.x+o.w*0.32,o.y+o.h*0.32,4,0,Math.PI*2);ctx.arc(o.x+o.w*0.68,o.y+o.h*0.32,4,0,Math.PI*2);ctx.fill()}
-  });
+function drawObstacles(){ obstacles.forEach(o=>{ if(o.type==='spike'){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.moveTo(o.x,o.y+o.h);ctx.lineTo(o.x+o.w/2,o.y);ctx.lineTo(o.x+o.w,o.y+o.h);ctx.fill()} else {ctx.fillStyle='#0f3460';ctx.strokeStyle='#e94560';ctx.lineWidth=3;roundRect(o.x,o.y,o.w,o.h,6);ctx.fill();ctx.stroke();ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(o.x+o.w*0.32,o.y+o.h*0.32,4,0,Math.PI*2);ctx.arc(o.x+o.w*0.68,o.y+o.h*0.32,4,0,Math.PI*2);ctx.fill()}})}
+function drawCoins(){
+  coins.forEach(c=>{
+    if(c.collected) return;
+    ctx.save(); const bob=Math.sin(Date.now()*0.006 + c.x*0.01)*4;
+    ctx.fillStyle='#ffd700'; ctx.strokeStyle='#ff8c00'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(c.x+c.w/2, c.y+c.h/2+bob, c.w/2, c.h/2,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#ff8c00'; ctx.font='bold 12px Arial'; ctx.textAlign='center'; ctx.fillText('★', c.x+c.w/2, c.y+c.h/2+4+bob);
+    ctx.restore();
+  })
 }
 function update(){
   if(!gameRunning) return;
   speed=3.6+obstaclesPassed*0.11;
-  score+=speed*0.16;
-  hud.textContent=player.name+' - '+Math.floor(score)+'m';
-  if(!player.grounded){player.vy+=GRAVITY;player.y+=player.vy;const gy=H*(1-GROUND_RATIO)-player.h;if(player.y>=gy){player.y=gy;player.vy=0;player.grounded=true;player.jumps=0;}}
-  // modo FACIL: obstaculos aun mas bajos y mas separados
-  if(Math.random()<0.009){const type=Math.random()<0.3?'spike':'box';const groundY=H*(1-GROUND_RATIO);const w=22+Math.random()*10;const h=type==='spike'?22:16+Math.random()*12;obstacles.push({x:W+10,y:groundY-h,w:w,h:h,type:type,passed:false});if(type==='box') obstaclesPassed++}
-  obstacles.forEach(o=>{o.x-=speed;if(!o.passed&&o.x+o.w<player.x){o.passed=true;if(o.type==='box') score+=5}});
+  // solo sumar metros en el suelo (estilo que pediste)
+  if(player.grounded) score+=speed*0.18;
+  updateHud();
+  // fisica con hover
+  if(!player.grounded){
+    const g = holding ? HOVER_GRAVITY : GRAVITY;
+    // si flotas, tambien frena la caida
+    if(holding && player.vy>2) player.vy=2;
+    player.vy+=g; player.y+=player.vy;
+    const gy=H*(1-GROUND_RATIO)-player.h;
+    if(player.y>=gy){player.y=gy;player.vy=0;player.grounded=true;player.jumps=0}
+    if(player.y<0){player.y=0;player.vy=0}
+  }
+  // generar obstaculos
+  if(Math.random()<0.009){const type=Math.random()<0.3?'spike':'box';const gy=H*(1-GROUND_RATIO);const w=22+Math.random()*10;const h=type==='spike'?22:16+Math.random()*12;obstacles.push({x:W+10,y:gy-h,w:w,h:h,type:type,passed:false}); if(type==='box') obstaclesPassed++}
+  // generar monedas estilo Mario (en el aire)
+  if(Math.random()<0.022){
+    const gy=H*(1-GROUND_RATIO);
+    const y = gy - 70 - Math.random()*90; // en el aire, requiere salto/flotar para atrapar
+    const x=W+10; coins.push({x:x,y:y,w:22,h:22,collected:false});
+  }
+  obstacles.forEach(o=>{o.x-=speed; if(!o.passed&&o.x+o.w<player.x){o.passed=true; }});
   obstacles=obstacles.filter(o=>o.x+o.w>-40);
-  const pr=10; // modo facil - hitbox muy generosa
-  for(const o of obstacles){if(player.x+player.w-pr>o.x&&player.x+pr<o.x+o.w&&player.y+player.h-pr>o.y&&player.y+pr<o.y+o.h){gameRunning=false;cancelAnimationFrame(animId);playHitSound();const best=saveScore(player.name, score);goName.textContent=player.name;goScore.textContent=Math.floor(score)+'m';renderRanking(goRanking, player.name);renderRanking(menuRanking, player.name);gameOverScreen.style.display='flex';return}}
-  drawBg();drawObstacles();drawPlayer();
+  coins.forEach(c=>{c.x-=speed; if(!c.collected && player.x < c.x+c.w && player.x+player.w > c.x && player.y < c.y+c.h && player.y+player.h > c.y){ c.collected=true; coinsCollected++; score+=10; playCoin(); }});
+  coins=coins.filter(c=>c.x+c.w>-30 && !c.collected || c.x>-30); // mantener no recolectadas
+  // colision obstaculos
+  const pr=10;
+  for(const o of obstacles){ if(player.x+player.w-pr>o.x&&player.x+pr<o.x+o.w&&player.y+player.h-pr>o.y&&player.y+pr<o.y+o.h){gameRunning=false;cancelAnimationFrame(animId);playHit();const best=saveScore(player.name, score);goName.textContent=player.name;goScore.textContent=Math.floor(score)+'m';goCoins.textContent=`🪙 ${coinsCollected} monedas`;renderRanking(goRanking, player.name);renderRanking(menuRanking, player.name);gameOverScreen.style.display='flex';return}}
+  drawBg();drawCoins();drawObstacles();drawPlayer();
 }
 function jump(){
   if(!gameRunning||!player) return;
   if(player.jumps>=MAX_JUMPS) return;
-  const isDouble = player.jumps===1;
-  player.vy = isDouble ? DOUBLE_JUMP_FORCE : JUMP_FORCE;
-  player.grounded=false;
-  player.jumps++;
-  playJumpSound(isDouble);
+  const d=player.jumps===1; player.vy=d?DOUBLE_JUMP_FORCE:JUMP_FORCE; player.grounded=false; player.jumps++; playJumpSound(d);
 }
 function startLoop(){function loop(){update();if(gameRunning) animId=requestAnimationFrame(loop)} loop()}
-function showMenu(){
-  gameRunning=false;cancelAnimationFrame(animId);
-  gameOverScreen.style.display='none';
-  canvas.style.display='none';
-  hud.style.display='none';
-  menu.style.display='flex';
-  renderRanking(menuRanking, nameInput.value.trim()||null);
-}
+function showMenu(){gameRunning=false;cancelAnimationFrame(animId);gameOverScreen.style.display='none';canvas.style.display='none';hud.style.display='none';menu.style.display='flex';renderRanking(menuRanking, nameInput.value.trim()||null)}
 playBtn.addEventListener('click',()=>{const n=nameInput.value.trim()||'Jugador';initGame(n);gameRunning=true;startLoop()});
 restartBtn.addEventListener('click',()=>{const n=goName.textContent||'Jugador';initGame(n);gameRunning=true;startLoop()});
 menuBtn.addEventListener('click', showMenu);
-document.addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='ArrowUp')&&gameRunning){e.preventDefault();jump()}});
-canvas.addEventListener('touchstart',e=>{e.preventDefault();jump()},{passive:false});
-document.addEventListener('touchstart',e=>{if(gameRunning&&canvas.style.display==='block'&&e.target!==restartBtn&&e.target!==menuBtn) { if(e.target===playBtn) return; jump(); }},{passive:false});
-canvas.addEventListener('mousedown',()=>{if(gameRunning) jump()});
+// controles hover: mantener presionado
+function setHold(v){holding=v}
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){if(!holding) jump(); setHold(true); if(gameRunning) e.preventDefault()}});
+document.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp') setHold(false)});
+canvas.addEventListener('touchstart',e=>{e.preventDefault();jump(); setHold(true)},{passive:false});
+canvas.addEventListener('touchend',e=>{e.preventDefault();setHold(false)},{passive:false});
+canvas.addEventListener('touchcancel',()=>setHold(false));
+document.addEventListener('touchstart',e=>{if(gameRunning&&canvas.style.display==='block'&&e.target!==restartBtn&&e.target!==menuBtn&&e.target!==playBtn){ if(e.target===canvas) return; jump(); setHold(true)}},{passive:false});
+document.addEventListener('touchend',()=>setHold(false));
+canvas.addEventListener('mousedown',e=>{jump(); setHold(true)});
+document.addEventListener('mouseup',()=>setHold(false));
 </script>
 </body>
 </html>
