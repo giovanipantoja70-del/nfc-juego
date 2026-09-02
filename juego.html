@@ -66,7 +66,7 @@ const menuBtn=document.getElementById('menuBtn');
 const menuRanking=document.getElementById('menuRanking');
 const goRanking=document.getElementById('goRanking');
 let W,H,player,obstacles=[],coins=[],score=0,coinsCollected=0,gameRunning=false,animId,speed=3.6,obstaclesPassed=0,holding=false;
-const GRAVITY=0.45,HOVER_GRAVITY=0.12,JUMP_FORCE=-15.2,DOUBLE_JUMP_FORCE=-14.5,GROUND_RATIO=0.15,MAX_JUMPS=2;
+const GRAVITY=0.52,HOVER_GRAVITY=0.20,JUMP_FORCE=-12.8,DOUBLE_JUMP_FORCE=-11.8,GROUND_RATIO=0.15,MAX_JUMPS=2;
 
 let audioCtx;
 function getAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
@@ -147,15 +147,17 @@ function update(){
   }
   // generar obstaculos
   if(Math.random()<0.009){const type=Math.random()<0.3?'spike':'box';const gy=H*(1-GROUND_RATIO);const w=22+Math.random()*10;const h=type==='spike'?22:16+Math.random()*12;obstacles.push({x:W+10,y:gy-h,w:w,h:h,type:type,passed:false}); if(type==='box') obstaclesPassed++}
-  // generar monedas estilo Mario (en el aire) - mas frecuente para que se vean
-  if(Math.random()<0.035){
+  // monedas mas faciles: banda media, bien alcanzable con 1 salto
+  if(Math.random()<0.038){
     const gy=H*(1-GROUND_RATIO);
-    const y = gy - 65 - Math.random()*85; // en el aire, requiere salto/flotar para atrapar
-    const x=W+10; coins.push({x:x,y:y,w:24,h:24,collected:false});
+    const y = gy - 55 - Math.random()*45; // 55-100px sobre el suelo, no tan arriba
+    const x=W+10; coins.push({x:x,y:y,w:28,h:28,collected:false});
   }
   obstacles.forEach(o=>{o.x-=speed; if(!o.passed&&o.x+o.w<player.x){o.passed=true; }});
   obstacles=obstacles.filter(o=>o.x+o.w>-40);
-  coins.forEach(c=>{c.x-=speed; if(!c.collected && player.x < c.x+c.w && player.x+player.w > c.x && player.y < c.y+c.h && player.y+player.h > c.y){ c.collected=true; coinsCollected++; score+=10; playCoin(); }});
+  coins.forEach(c=>{c.x-=speed; // hitbox generosa +6px
+    const pad=8;
+    if(!c.collected && player.x-pad < c.x+c.w && player.x+player.w+pad > c.x && player.y-pad < c.y+c.h && player.y+player.h+pad > c.y){ c.collected=true; coinsCollected++; score+=10; playCoin(); }});
   coins=coins.filter(c=> !c.collected && c.x+c.w>-30);
   // colision obstaculos
   const pr=10;
