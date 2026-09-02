@@ -66,7 +66,7 @@ const menuBtn=document.getElementById('menuBtn');
 const menuRanking=document.getElementById('menuRanking');
 const goRanking=document.getElementById('goRanking');
 let W,H,player,obstacles=[],score=0,gameRunning=false,animId,speed=5,obstaclesPassed=0;
-const GRAVITY=0.55,JUMP_FORCE=-14.2,DOUBLE_JUMP_FORCE=-13.5,GROUND_RATIO=0.15,MAX_JUMPS=2;
+const GRAVITY=0.45,JUMP_FORCE=-15.2,DOUBLE_JUMP_FORCE=-14.5,GROUND_RATIO=0.15,MAX_JUMPS=2;
 
 // --- Sonido ---
 let audioCtx;
@@ -168,15 +168,15 @@ function drawObstacles(){
 }
 function update(){
   if(!gameRunning) return;
-  speed=4.2+obstaclesPassed*0.18;
+  speed=3.6+obstaclesPassed*0.11;
   score+=speed*0.16;
   hud.textContent=player.name+' - '+Math.floor(score)+'m';
   if(!player.grounded){player.vy+=GRAVITY;player.y+=player.vy;const gy=H*(1-GROUND_RATIO)-player.h;if(player.y>=gy){player.y=gy;player.vy=0;player.grounded=true;player.jumps=0;}}
-  // spawn mas separado y obstaculos mas bajos para que el doble salto alcance
-  if(Math.random()<0.012){const type=Math.random()<0.35?'spike':'box';const groundY=H*(1-GROUND_RATIO);const w=24+Math.random()*12;const h=type==='spike'?26:20+Math.random()*14;obstacles.push({x:W+10,y:groundY-h,w:w,h:h,type:type,passed:false});if(type==='box') obstaclesPassed++}
+  // modo FACIL: obstaculos aun mas bajos y mas separados
+  if(Math.random()<0.009){const type=Math.random()<0.3?'spike':'box';const groundY=H*(1-GROUND_RATIO);const w=22+Math.random()*10;const h=type==='spike'?22:16+Math.random()*12;obstacles.push({x:W+10,y:groundY-h,w:w,h:h,type:type,passed:false});if(type==='box') obstaclesPassed++}
   obstacles.forEach(o=>{o.x-=speed;if(!o.passed&&o.x+o.w<player.x){o.passed=true;if(o.type==='box') score+=5}});
   obstacles=obstacles.filter(o=>o.x+o.w>-40);
-  const pr=7; // hitbox mas generosa
+  const pr=10; // modo facil - hitbox muy generosa
   for(const o of obstacles){if(player.x+player.w-pr>o.x&&player.x+pr<o.x+o.w&&player.y+player.h-pr>o.y&&player.y+pr<o.y+o.h){gameRunning=false;cancelAnimationFrame(animId);playHitSound();const best=saveScore(player.name, score);goName.textContent=player.name;goScore.textContent=Math.floor(score)+'m';renderRanking(goRanking, player.name);renderRanking(menuRanking, player.name);gameOverScreen.style.display='flex';return}}
   drawBg();drawObstacles();drawPlayer();
 }
