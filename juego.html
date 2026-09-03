@@ -351,28 +351,57 @@ function update(){
     }
   });
   const pr=6;
+  let blocked=false;
   for(const o of obstacles){
-    const inv = player.giant>0 || player.star>0 || player.dashing>0;
     const oy = o._drawY!==undefined ? o._drawY : o.y;
+    const inv = player.giant>0 || player.star>0 || player.dashing>0;
+    // MURO SOLIDO: bloquea, no quita 1 zombie al tocar
+    if(o.type==='wall'){
+      const isOver = player.y+player.h < oy+8; // saltaste por encima
+      const touching = player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>oy;
+      if(touching){
+        if(inv){ o.x=-100; score+=5; particles.push({x:o.x,y:o.y,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'}); continue; }
+        if(isOver){
+          // pasaste por arriba, cuenta como superado
+          if(player.x > o.x+o.w){ o._passed=true; }
+          continue;
+        }
+        // bloquea y empuja la horda
+        blocked=true;
+        player.x = Math.min(player.x, o.x - player.w - 2);
+        // si te empuja fuera de pantalla, muere toda la horda
+        if(player.x < -10){
+          gameRunning=false; cancelAnimationFrame(animId); dashBtn.style.display='none'; shieldIcon.style.display='none';
+          const best=saveRank(player.name,score); goScore.textContent=Math.floor(score)+' m'; goZombies.textContent='Horda aplastada por muro'; goCoins.textContent='Monedas: '+coinsCollected; renderRank(goRanking,player.name); renderRank(menuRanking,player.name); gameOverScreen.style.display='flex'; return;
+        }
+        // escudo evita quedar bloqueado 1 vez
+        if(player.shield){
+          player.shield=false; player.shieldCD=360;
+          o.x=-100; blocked=false; player.x=W*0.13; sndHit();
+          particles.push({x:player.x,y:player.y-10,vy:-2,vx:0,life:1,text:'ESCUDO!',color:'#00d4ff'});
+          continue;
+        }
+        // si sigues bloqueado y el muro ya pasó, no sigas empujando
+        continue;
+      }
+      // muro superado limpio
+      if(o._passed){ o.x=-100; score+=8; particles.push({x:o.x,y:oy,vy:-1,vx:0,life:1,text:'+8',color:'#39ff14'}); }
+      continue;
+    }
+    // bombas y aéreos: daño directo
     if(player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>oy && player.y+pr<oy+o.h){
-      if(inv){
-        o.x=-100; score+=5; particles.push({x:o.x,y:o.y,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'});
-        continue;
-      }
-      // escudo absorbe 1 golpe
-      if(player.shield){
-        player.shield=false; player.shieldCD=360; o.x=-100; sndHit();
-        particles.push({x:player.x,y:player.y-10,vy:-2,vx:0,life:1,text:'ESCUDO!',color:'#00d4ff'});
-        canvas.style.transform='translate(1px,0)'; setTimeout(()=>canvas.style.transform='',80);
-        continue;
-      }
+      if(inv){ o.x=-100; score+=5; particles.push({x:o.x,y:o.y,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'}); continue; }
+      if(player.shield){ player.shield=false; player.shieldCD=360; o.x=-100; sndHit(); particles.push({x:player.x,y:player.y-10,vy:-2,vx:0,life:1,text:'ESCUDO!',color:'#00d4ff'}); canvas.style.transform='translate(1px,0)'; setTimeout(()=>canvas.style.transform='',80); continue; }
       o.x=-100;
-      if(o.type==='bomb'){ player.horde=Math.max(0,player.horde-3); particles.push({x:o.x+12,y:o.y,vy:-2,vx:0,life:1,text:'-3',color:'#ff1a1a'}); sndHit(); }
-      else { player.horde=Math.max(0,player.horde-1); particles.push({x:o.x+12,y:o.y,vy:-2,vx:0,life:1,text:'-1',color:'#ff6b6b'}); sndHit(); }
+      if(o.type==='bomb'){ player.horde=Math.max(0,player.horde-3); particles.push({x:o.x+12,y:oy,vy:-2,vx:0,life:1,text:'-3',color:'#ff1a1a'}); sndHit(); }
+      else if(o.type==='aerial'){ player.horde=Math.max(0,player.horde-2); particles.push({x:o.x+12,y:oy,vy:-2,vx:0,life:1,text:'-2',color:'#a020f0'}); sndHit(); }
+      else { player.horde=Math.max(0,player.horde-1); particles.push({x:o.x+12,y:oy,vy:-2,vx:0,life:1,text:'-1',color:'#ff6b6b'}); sndHit(); }
       canvas.style.transform='translate(2px,0)'; setTimeout(()=>canvas.style.transform='',60);
       if(player.horde<=0){ gameRunning=false; cancelAnimationFrame(animId); dashBtn.style.display='none'; shieldIcon.style.display='none'; const best=saveRank(player.name,score); goScore.textContent=Math.floor(score)+' m'; goZombies.textContent='Horda final: '+player.horde; goCoins.textContent='Monedas: '+coinsCollected; renderRank(goRanking,player.name); renderRank(menuRanking,player.name); gameOverScreen.style.display='flex'; return; }
     }
   }
+  // si no bloqueado, la horda avanza lentamente al centro
+  if(!blocked && player.x < W*0.13){ player.x = Math.min(W*0.13, player.x+2); }
   pedestrians=pedestrians.filter(p=>!p.eaten && p.x+p.w>-30);
   obstacles=obstacles.filter(o=>o.x+o.w>-40);
   coins=coins.filter(c=>!c.collected && c.x+c.w>-30);
