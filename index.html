@@ -55,6 +55,14 @@ const nameInput=document.getElementById('nameInput'), playBtn=document.getElemen
 const menuRanking=document.getElementById('menuRanking'), goRanking=document.getElementById('goRanking'), gameOverScreen=document.getElementById('gameOver');
 let W,H,player,pedestrians=[],obstacles=[],coins=[],particles=[],score=0,coinsCollected=0,gameRunning=false,animId,speed=3.8,holding=false,tick=0,bgOffset=0;
 const GRAVITY=0.52,HOVER_GRAVITY=0.20,JUMP=-12.6,DOUBLE_JUMP=-11.2,GROUND_RATIO=0.16,MAX_JUMPS=2;
+// --- Pixel art sprites ---
+const zombieImgs=[new Image(),new Image(),new Image()];
+zombieImgs[0].src='assets/zombie_walk_A.png';
+zombieImgs[1].src='assets/zombie_walk_B.png';
+zombieImgs[2].src='assets/zombie_walk_C.png';
+let spritesLoaded=false;
+let loadedCount=0; zombieImgs.forEach(img=>{img.onload=()=>{loadedCount++; if(loadedCount===3) spritesLoaded=true;}; img.onerror=()=>{loadedCount++;};});
+ctx.imageSmoothingEnabled=false;
 
 let ac;
 function getAc(){if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac;}
@@ -122,48 +130,46 @@ function drawBg(){
   ctx.fillStyle='rgba(255,255,255,.06)'; for(let x=(bgOffset*1.2)%40-40;x<W;x+=40) ctx.fillRect(x,gy+8,18,2);
 }
 
-// zombie con animación de correr
+// zombie pixel art con sprite real si carga, fallback a dibujo
 function drawZombie(x,y,phase, isLeader, inAir, holding){
   const bob = inAir ? 0 : Math.sin(phase)*2.2;
-  const legSwing = inAir ? 0 : Math.sin(phase)*6;
-  const armSwing = inAir ? 0 : Math.sin(phase+1)*5;
   const ty = y + bob;
   // sombra
   if(!inAir){ ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x+7, y+16, 7,3,0,0,Math.PI*2); ctx.fill(); }
-  // cuerpo inclinado si flota
+  const idx = Math.abs(Math.floor(x+y)) % 3;
+  const img = zombieImgs[idx];
+  if(spritesLoaded && img.complete && img.naturalWidth>0){
+    ctx.save();
+    if(inAir && holding){ ctx.translate(x+7, ty+8); ctx.rotate(-0.12); ctx.translate(-x-7, -ty-8); }
+    ctx.imageSmoothingEnabled=false;
+    // animación por frames: recorta 4 frames horizontales del spritesheet
+    const frames=4;
+    const fw = img.width/frames, fh = img.height;
+    const f = Math.floor(phase*1.2) % frames;
+    // dibuja frame pixelado escalado a 22x26
+    try{ ctx.drawImage(img, f*fw, 0, fw, fh, x-4, ty-10, 22, 26);}catch(e){
+      // fallback si recorte falla, dibuja entero
+      ctx.drawImage(img, x-4, ty-10, 22, 26);
+    }
+    ctx.restore();
+    // borde lider
+    if(isLeader){ ctx.strokeStyle='rgba(57,255,20,.9)'; ctx.lineWidth=1; ctx.strokeRect(x-4,ty-10,22,26); }
+    return;
+  }
+  // fallback dibujo vectorial (si no cargó sprite)
+  const legSwing = inAir ? 0 : Math.sin(phase)*6;
+  const armSwing = inAir ? 0 : Math.sin(phase+1)*5;
   ctx.save();
   if(inAir && holding){ ctx.translate(x+7, ty+8); ctx.rotate(-0.12); ctx.translate(-x-7, -ty-8); }
-  // piernas
-  ctx.fillStyle='#1a4a1a';
-  ctx.fillRect(x+2+legSwing*0.18, ty+12, 4, 6); // izq
-  ctx.fillRect(x+8-legSwing*0.18, ty+12, 4, 6); // der
-  // cuerpo
-  ctx.fillStyle = isLeader ? '#39ff14' : '#2ecc71';
-  ctx.fillRect(x, ty, 14, 12);
-  // franja pecho
+  ctx.fillStyle='#1a4a1a'; ctx.fillRect(x+2+legSwing*0.18, ty+12, 4, 6); ctx.fillRect(x+8-legSwing*0.18, ty+12, 4, 6);
+  ctx.fillStyle = isLeader ? '#39ff14' : '#2ecc71'; ctx.fillRect(x, ty, 14, 12);
   ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fillRect(x, ty+5,14,2);
-  // brazos
-  ctx.fillStyle='#2a7a2a';
-  ctx.fillRect(x-3+armSwing*0.2, ty+2, 4,7);
-  ctx.fillRect(x+13-armSwing*0.2, ty+2, 4,7);
-  // manos extendidas si flota
+  ctx.fillStyle='#2a7a2a'; ctx.fillRect(x-3+armSwing*0.2, ty+2, 4,7); ctx.fillRect(x+13-armSwing*0.2, ty+2, 4,7);
   if(inAir && holding){ ctx.fillRect(x-5, ty, 3,4); ctx.fillRect(x+16, ty,3,4); }
-  // cabeza
-  ctx.fillStyle='#c8f5b8';
-  ctx.fillRect(x+2, ty-8, 10,9);
-  // pelo
-  ctx.fillStyle='#1a1a1a'; ctx.fillRect(x+2, ty-8,10,3);
-  // ojos
-  if(inAir){
-    ctx.fillStyle='#000'; ctx.fillRect(x+3, ty-3, 2.5,1.5); ctx.fillRect(x+9, ty-3,2.5,1.5);
-  } else {
-    const eyeY = ty-4 + Math.sin(phase)*0.3;
-    ctx.fillStyle='#000'; ctx.fillRect(x+3, eyeY, 2.5,2.5); ctx.fillRect(x+9, eyeY,2.5,2.5);
-    ctx.fillStyle='#ff1a1a'; ctx.fillRect(x+3.7, eyeY+0.7,1,1); ctx.fillRect(x+9.7, eyeY+0.7,1,1);
-  }
-  // boca
-  ctx.fillStyle='#2a0000'; ctx.fillRect(x+5, ty-1,4,1.5);
-  ctx.fillStyle='#fff'; ctx.fillRect(x+6, ty-1,1,1); ctx.fillRect(x+8, ty-1,1,1);
+  ctx.fillStyle='#c8f5b8'; ctx.fillRect(x+2, ty-8, 10,9); ctx.fillStyle='#1a1a1a'; ctx.fillRect(x+2, ty-8,10,3);
+  if(inAir){ ctx.fillStyle='#000'; ctx.fillRect(x+3, ty-3, 2.5,1.5); ctx.fillRect(x+9, ty-3,2.5,1.5);
+  } else { const eyeY = ty-4 + Math.sin(phase)*0.3; ctx.fillStyle='#000'; ctx.fillRect(x+3, eyeY, 2.5,2.5); ctx.fillRect(x+9, eyeY,2.5,2.5); ctx.fillStyle='#ff1a1a'; ctx.fillRect(x+3.7, eyeY+0.7,1,1); ctx.fillRect(x+9.7, eyeY+0.7,1,1); }
+  ctx.fillStyle='#2a0000'; ctx.fillRect(x+5, ty-1,4,1.5); ctx.fillStyle='#fff'; ctx.fillRect(x+6, ty-1,1,1); ctx.fillRect(x+8, ty-1,1,1);
   ctx.restore();
 }
 
