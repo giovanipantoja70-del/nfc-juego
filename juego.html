@@ -355,37 +355,33 @@ function update(){
   for(const o of obstacles){
     const oy = o._drawY!==undefined ? o._drawY : o.y;
     const inv = player.giant>0 || player.star>0 || player.dashing>0;
-    // MURO SOLIDO: bloquea, no quita 1 zombie al tocar
+    // MURO SOLIDO: bloquea solo si estas en el suelo, si saltas pasas
     if(o.type==='wall'){
-      const isOver = player.y+player.h < oy+8; // saltaste por encima
-      const touching = player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>oy;
+      const touching = player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>oy && player.y+pr<oy+o.h;
       if(touching){
-        if(inv){ o.x=-100; score+=5; particles.push({x:o.x,y:o.y,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'}); continue; }
-        if(isOver){
-          // pasaste por arriba, cuenta como superado
-          if(player.x > o.x+o.w){ o._passed=true; }
+        if(inv){ o.x=-100; score+=8; particles.push({x:o.x,y:oy,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'}); continue; }
+        // si estas en el aire, no bloquea - solo deja pasar
+        if(!player.grounded){
+          // si ya lo pasaste, marca y elimina
+          if(player.x > o.x+o.w){ o.x=-100; score+=8; particles.push({x:o.x,y:oy,vy:-1,vx:0,life:1,text:'+8',color:'#39ff14'}); }
           continue;
         }
-        // bloquea y empuja la horda
+        // en el suelo y tocando -> bloquea
+        if(player.shield){
+          player.shield=false; player.shieldCD=360;
+          o.x=-100; sndHit(); particles.push({x:player.x,y:player.y-10,vy:-2,vx:0,life:1,text:'ESCUDO!',color:'#00d4ff'});
+          continue;
+        }
         blocked=true;
-        player.x = Math.min(player.x, o.x - player.w - 2);
-        // si te empuja fuera de pantalla, muere toda la horda
-        if(player.x < -10){
+        player.x = Math.min(player.x, o.x - player.w - 1);
+        if(player.x < -12){
           gameRunning=false; cancelAnimationFrame(animId); dashBtn.style.display='none'; shieldIcon.style.display='none';
           const best=saveRank(player.name,score); goScore.textContent=Math.floor(score)+' m'; goZombies.textContent='Horda aplastada por muro'; goCoins.textContent='Monedas: '+coinsCollected; renderRank(goRanking,player.name); renderRank(menuRanking,player.name); gameOverScreen.style.display='flex'; return;
         }
-        // escudo evita quedar bloqueado 1 vez
-        if(player.shield){
-          player.shield=false; player.shieldCD=360;
-          o.x=-100; blocked=false; player.x=W*0.13; sndHit();
-          particles.push({x:player.x,y:player.y-10,vy:-2,vx:0,life:1,text:'ESCUDO!',color:'#00d4ff'});
-          continue;
-        }
-        // si sigues bloqueado y el muro ya pasó, no sigas empujando
         continue;
       }
-      // muro superado limpio
-      if(o._passed){ o.x=-100; score+=8; particles.push({x:o.x,y:oy,vy:-1,vx:0,life:1,text:'+8',color:'#39ff14'}); }
+      // muro superado por haberlo saltado y ya paso de largo
+      if(player.x > o.x+o.w && o.x+o.w>0){ o.x=-100; score+=8; particles.push({x:o.x,y:oy,vy:-1,vx:0,life:1,text:'+8',color:'#39ff14'}); }
       continue;
     }
     // bombas y aéreos: daño directo
@@ -410,11 +406,14 @@ function update(){
 }
 function drawHorde(){
   const baseX=player.x, baseY=player.y; const inAir=!player.grounded;
-  const display = Math.min(player.horde, 12); // limite visual para no llenar pantalla
+  const display = Math.min(player.horde, 12);
+  // efecto serpiente: cada zombie sigue la onda del lider con retardo
   for(let i=0;i<display;i++){
     const col=i%4, row=Math.floor(i/4);
-    const x=baseX+col*11-(display>6?8:0)+Math.sin(tick*0.08+i)*0.6;
-    const y=baseY-row*12;
+    const delay = i*0.45;
+    const wave = Math.sin(tick*0.14 - delay)*4.5 + Math.sin(tick*0.08+i)*0.8;
+    const x=baseX+col*11-(display>6?8:0);
+    const y=baseY-row*12 + wave + (inAir? Math.sin(tick*0.2-delay)*1.5 : 0);
     const phase=tick*0.55+i*0.9;
     drawZombieSprite(x,y,phase,i===0,inAir,holding);
   }
