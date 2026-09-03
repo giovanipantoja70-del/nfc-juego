@@ -334,16 +334,17 @@ function update(){
       }
     });
   }
-  // cualquier zombie de la horda puede recoger monedas
+  // cualquier zombie de la horda (ahora hacia atras) puede recoger monedas
   const displayForCollect = Math.min(player.horde, 12);
   coins.forEach(c=>{
     if(c.collected) return;
     let hit=false;
     for(let i=0;i<displayForCollect;i++){
-      const col=i%4, row=Math.floor(i/4);
-      const zx=player.x+col*11-(displayForCollect>6?8:0);
-      const zy=player.y-row*12;
-      if(zx-8 < c.x+c.w && zx+30 > c.x && zy-14 < c.y+c.h && zy+26 > c.y){ hit=true; break; }
+      const delay=i*0.38;
+      const wave=Math.sin(tick*0.16 - delay)*5;
+      const zx=player.x - i*9;
+      const zy=player.y + wave;
+      if(zx-8 < c.x+c.w && zx+22 > c.x && zy-12 < c.y+c.h && zy+28 > c.y){ hit=true; break; }
     }
     if(hit){
       c.collected=true; coinsCollected++; score+=10; sndCoin();
@@ -407,19 +408,18 @@ function update(){
 function drawHorde(){
   const baseX=player.x, baseY=player.y; const inAir=!player.grounded;
   const display = Math.min(player.horde, 12);
-  // efecto serpiente: cada zombie sigue la onda del lider con retardo
+  // acumulacion hacia atras (horizontal), efecto serpiente
   for(let i=0;i<display;i++){
-    const col=i%4, row=Math.floor(i/4);
-    const delay = i*0.45;
-    const wave = Math.sin(tick*0.14 - delay)*4.5 + Math.sin(tick*0.08+i)*0.8;
-    const x=baseX+col*11-(display>6?8:0);
-    const y=baseY-row*12 + wave + (inAir? Math.sin(tick*0.2-delay)*1.5 : 0);
+    const delay = i*0.38;
+    const wave = Math.sin(tick*0.16 - delay)*5 + Math.sin(tick*0.08+i)*0.6;
+    const x = baseX - i*9; // hacia atras, no hacia arriba
+    const y = baseY + wave + (inAir? Math.sin(tick*0.2-delay)*1.2 : 0);
     const phase=tick*0.55+i*0.9;
     drawZombieSprite(x,y,phase,i===0,inAir,holding);
   }
   if(player.horde>12){
-    ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(baseX+14, baseY-38, 28,14);
-    ctx.fillStyle='#39ff14'; ctx.font='bold 10px Arial'; ctx.textAlign='center'; ctx.fillText(`+${player.horde-12}`, baseX+28, baseY-28);
+    ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(baseX+18, baseY-36, 30,14);
+    ctx.fillStyle='#39ff14'; ctx.font='bold 10px Arial'; ctx.textAlign='center'; ctx.fillText(`+${player.horde-12}`, baseX+33, baseY-26);
   }
 }
 function jump(){
