@@ -3,193 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>NIMBUS</title>
+<title>TSUNAMI Z</title>
+<meta name="description" content="Proyecto U - Zombie Tsunami via NFC">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;touch-action:manipulation}
-#menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:18px;position:relative;z-index:10;background:#1a1a2e;overflow-y:auto}
-#menu h1{font-size:2.15em;margin-bottom:6px;color:#e94560}
-#menu p.sub{font-size:0.92em;margin-bottom:12px;color:#aaa}
-#menu input{width:80%;max-width:280px;padding:13px 18px;font-size:1.08em;border:2px solid #e94560;border-radius:12px;background:transparent;color:#fff;outline:none;text-align:center;margin-bottom:14px}
-button{padding:13px 46px;font-size:1.12em;border:none;border-radius:12px;background:#e94560;color:#fff;cursor:pointer;font-weight:bold}
+body{font-family:Arial,sans-serif;background:#0f0f0f;color:#fff;overflow:hidden;touch-action:manipulation}
+#menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;background:linear-gradient(180deg,#1a1a1a,#0f4a1f);overflow-y:auto}
+#menu h1{font-size:2.6em;letter-spacing:2px;color:#39ff14;text-shadow:0 0 12px rgba(57,255,20,.6);margin-bottom:6px}
+#menu p.sub{color:#b0ff9a;margin-bottom:18px}
+#menu input{width:80%;max-width:280px;padding:13px 18px;font-size:1.05em;border:2px solid #39ff14;border-radius:12px;background:rgba(0,0,0,.35);color:#fff;outline:none;text-align:center;margin-bottom:14px}
+button{padding:13px 42px;font-size:1.08em;border:none;border-radius:12px;background:#39ff14;color:#0a1a0a;cursor:pointer;font-weight:bold}
 button:active{transform:scale(0.97)}
 #gameCanvas{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh}
-#hud{position:fixed;top:10px;left:50%;transform:translateX(-50%);font-size:.95em;font-weight:bold;color:#fff;z-index:5;text-shadow:0 2px 4px rgba(0,0,0,.7);display:none;white-space:nowrap}
-#gameOver{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:rgba(0,0,0,.84);position:fixed;top:0;left:0;width:100vw;z-index:20;padding:20px;overflow-y:auto}
-#gameOver h1{font-size:1.9em;color:#e94560;margin-bottom:8px}
-#gameOver .score{font-size:1.55em;color:#ffd700;font-weight:bold;margin-bottom:8px}
-.ranking{width:100%;max-width:320px;margin:12px 0;background:rgba(255,255,255,.06);border:1px solid rgba(233,69,96,.3);border-radius:12px;padding:12px}
-.ranking h3{font-size:.92em;color:#e94560;margin-bottom:8px;text-align:center}
-.ranking ol{list-style:none;padding:0}
+#hud{position:fixed;top:10px;left:0;width:100%;display:none;justify-content:space-between;padding:0 14px;font-weight:bold;z-index:5;pointer-events:none;text-shadow:0 2px 4px rgba(0,0,0,.7)}
+#hud span{background:rgba(0,0,0,.45);padding:6px 10px;border-radius:10px}
+#gameOver{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:rgba(0,0,0,.86);position:fixed;top:0;left:0;width:100vw;z-index:20;padding:20px;overflow-y:auto}
+#gameOver h1{font-size:2em;color:#39ff14;margin-bottom:8px}
+#gameOver .score{font-size:1.4em;color:#fff;margin-bottom:6px}
+.ranking{width:100%;max-width:340px;margin:12px 0;background:rgba(255,255,255,.06);border:1px solid rgba(57,255,20,.25);border-radius:12px;padding:12px}
+.ranking h3{font-size:.92em;color:#39ff14;text-align:center;margin-bottom:8px}
+.ranking ol{list-style:none}
 .ranking li{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;font-size:.88em}
-.ranking li.me{background:rgba(233,69,96,.18);font-weight:bold}
-.ranking li:nth-child(1){color:#ffd700}
-#instructions{font-size:.78em;color:#888;margin-top:8px;line-height:1.4}
-.coin-hud{color:#ffd700}
+.ranking li.me{background:rgba(57,255,20,.15);font-weight:bold}
+#instructions{font-size:.78em;color:#b0ff9a;margin-top:10px;line-height:1.4;max-width:320px}
+.badge{display:inline-block;background:#39ff14;color:#000;padding:2px 8px;border-radius:20px;font-size:.7em;margin-left:6px}
 </style>
 </head>
 <body>
 <div id="menu">
-  <h1>NIMBUS</h1>
-  <p class="sub">Flota entre obstaculos</p>
-  <input type="text" id="nameInput" placeholder="Tu nombre" maxlength="15" autocomplete="off">
-  <button id="playBtn">Jugar</button>
-  <div id="instructions">Toque corto para saltar — mantén presionado para flotar</div>
+  <h1>TSUNAMI Z</h1>
+  <p class="sub">Proyecto U — Atrapa peatones y haz crecer la horda</p>
+  <input id="nameInput" placeholder="Tu nombre" maxlength="15" autocomplete="off">
+  <button id="playBtn">JUGAR</button>
+  <div id="instructions">Toque corto = salto · Mantén para flotar un poco<br>Atrapa peatones para +zombies · Monedas +10 · Bombas te quitan zombies<br>Si te quedas en 0 zombies, pierdes</div>
   <div class="ranking" id="menuRanking"></div>
 </div>
 <canvas id="gameCanvas"></canvas>
-<div id="hud"></div>
+<div id="hud"><span id="hudLeft"></span><span id="hudRight"></span></div>
 <div id="gameOver">
-  <h1>Partida terminada</h1>
-  <p>Jugador: <span id="goName"></span></p>
+  <h1>HORDA DEVORADA</h1>
   <p class="score" id="goScore"></p>
+  <p id="goZombies" style="color:#39ff14"></p>
   <p id="goCoins" style="color:#ffd700"></p>
   <div class="ranking" id="goRanking"></div>
   <button id="restartBtn">Jugar de nuevo</button>
-  <button id="menuBtn" style="margin-top:10px;background:transparent;border:2px solid #e94560">Menu</button>
+  <button id="menuBtn" style="margin-top:10px;background:transparent;border:2px solid #39ff14;color:#39ff14">Menú</button>
 </div>
 <script>
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-const menu=document.getElementById('menu');
-const hud=document.getElementById('hud');
-const gameOverScreen=document.getElementById('gameOver');
-const goName=document.getElementById('goName');
-const goScore=document.getElementById('goScore');
-const goCoins=document.getElementById('goCoins');
-const nameInput=document.getElementById('nameInput');
-const playBtn=document.getElementById('playBtn');
-const restartBtn=document.getElementById('restartBtn');
-const menuBtn=document.getElementById('menuBtn');
-const menuRanking=document.getElementById('menuRanking');
-const goRanking=document.getElementById('goRanking');
-let W,H,player,obstacles=[],coins=[],score=0,coinsCollected=0,gameRunning=false,animId,speed=3.6,obstaclesPassed=0,holding=false;
-const GRAVITY=0.52,HOVER_GRAVITY=0.20,JUMP_FORCE=-12.8,DOUBLE_JUMP_FORCE=-11.8,GROUND_RATIO=0.15,MAX_JUMPS=2;
+const canvas=document.getElementById('gameCanvas'), ctx=canvas.getContext('2d');
+const menu=document.getElementById('menu'), hud=document.getElementById('hud'), hudLeft=document.getElementById('hudLeft'), hudRight=document.getElementById('hudRight');
+const goScore=document.getElementById('goScore'), goZombies=document.getElementById('goZombies'), goCoins=document.getElementById('goCoins');
+const nameInput=document.getElementById('nameInput'), playBtn=document.getElementById('playBtn'), restartBtn=document.getElementById('restartBtn'), menuBtn=document.getElementById('menuBtn');
+const menuRanking=document.getElementById('menuRanking'), goRanking=document.getElementById('goRanking'), gameOverScreen=document.getElementById('gameOver');
+let W,H,player,pedestrians=[],obstacles=[],coins=[],score=0,coinsCollected=0,gameRunning=false,animId,speed=3.8,holding=false;
+const GRAVITY=0.52,HOVER_GRAVITY=0.20,JUMP=-12.6,DOUBLE_JUMP=-11.2,GROUND_RATIO=0.16,MAX_JUMPS=2;
 
-let audioCtx;
-function getAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
-function playJumpSound(d){try{const ac=getAudio(),o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=d?520:380;o.connect(g);g.connect(ac.destination);g.gain.value=0.18;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.22);o.frequency.exponentialRampToValueAtTime(d?880:620,ac.currentTime+0.12);o.stop(ac.currentTime+0.23)}catch(e){}}
-function playCoin(){try{const ac=getAudio();[659,880].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.value=0.15;const t=ac.currentTime+i*0.09;o.start(t);g.gain.exponentialRampToValueAtTime(0.001,t+0.2);o.stop(t+0.2)})}catch(e){}}
-function playHit(){try{const ac=getAudio(),o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=180;o.connect(g);g.connect(ac.destination);g.gain.value=0.2;o.start();o.frequency.linearRampToValueAtTime(70,ac.currentTime+0.25);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.stop(ac.currentTime+0.32)}catch(e){}}
+// audio simple
+let ac;
+function getAc(){if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac;}
+function sndJump(d){try{const a=getAc(),o=a.createOscillator(),g=a.createGain();o.frequency.value=d?520:360;o.connect(g);g.connect(a.destination);g.gain.value=0.16;o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.18);o.frequency.exponentialRampToValueAtTime(d?820:620,a.currentTime+0.1);o.stop(a.currentTime+0.19)}catch(e){}}
+function sndCoin(){try{const a=getAc();[659,880].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.value=0.13;const t=a.currentTime+i*0.08;o.start(t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);o.stop(t+0.18)})}catch(e){}}
+function sndEat(){try{const a=getAc(),o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=300;o.connect(g);g.connect(a.destination);g.gain.value=0.18;o.start();o.frequency.linearRampToValueAtTime(900,a.currentTime+0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.18);o.stop(a.currentTime+0.19)}catch(e){}}
+function sndHit(){try{const a=getAc(),o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=140;o.connect(g);g.connect(a.destination);g.gain.value=0.18;o.start();o.frequency.linearRampToValueAtTime(60,a.currentTime+0.22);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.24);o.stop(a.currentTime+0.25)}catch(e){}}
 
-const STORE_KEY='nfc_juego_ranking_v2';
-function loadRanking(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]')}catch{return []}}
-function saveScore(name, sc){
-  const list=loadRanking();
-  list.push({name:name, score:Math.floor(sc), date:Date.now()});
-  const map=new Map();
-  for(const e of list){const cur=map.get(e.name); if(!cur||e.score>cur.score) map.set(e.name,e)}
-  const best=[...map.values()].sort((a,b)=>b.score-a.score).slice(0,10);
-  localStorage.setItem(STORE_KEY, JSON.stringify(best)); return best;
+// ranking
+const KEY='tsunami_z_ranking';
+function loadRank(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
+function saveRank(name, sc){
+  const list=loadRank(); list.push({name,score:Math.floor(sc),date:Date.now()});
+  const m=new Map(); for(const e of list){const c=m.get(e.name); if(!c||e.score>c.score) m.set(e.name,e)}
+  const best=[...m.values()].sort((a,b)=>b.score-a.score).slice(0,10);
+  localStorage.setItem(KEY,JSON.stringify(best)); return best;
 }
-function renderRanking(container, hl){
-  const list=loadRanking();
-  if(list.length===0){container.innerHTML='<h3>Ranking</h3><p style="color:#777;font-size:.85em">Aun sin partidas</p>';return}
-  let h='<h3>Ranking Top 10</h3><ol>'; list.forEach((e,i)=>{h+=`<li${e.name===hl?' class="me"':''}><span>${i+1}. ${e.name}</span><span>${e.score}m</span></li>`}); h+='</ol>'; container.innerHTML=h;
+function renderRank(el,hl){
+  const l=loadRank();
+  if(l.length===0){el.innerHTML='<h3>Ranking</h3><p style="color:#777;font-size:.85em">Aun sin partidas</p>';return}
+  let h='<h3>Ranking Top 10</h3><ol>'; l.forEach((e,i)=>{h+=`<li${e.name===hl?' class="me"':''}><span>${i+1}. ${e.name}</span><span>${e.score}m</span></li>`}); h+='</ol>'; el.innerHTML=h;
 }
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
-resize();window.addEventListener('resize',resize); renderRanking(menuRanking);
+resize(); addEventListener('resize',resize); renderRank(menuRanking);
 
-function initGame(n){
-  resize(); player={x:W*0.15,y:H*(1-GROUND_RATIO)-45,w:34,h:42,vy:0,grounded:true,jumps:0,name:n};
-  obstacles=[];coins=[];score=0;coinsCollected=0;speed=3.6;obstaclesPassed=0;holding=false;
-  gameOverScreen.style.display='none'; menu.style.display='none'; canvas.style.display='block'; hud.style.display='block';
-  updateHud(); getAudio(); drawBg();drawPlayer();
+function init(n){
+  resize();
+  player={x:W*0.13,y:H*(1-GROUND_RATIO)-36,w:36,h:36,vy:0,grounded:true,jumps:0,name:n,horde:4};
+  pedestrians=[]; obstacles=[]; coins=[]; score=0; coinsCollected=0; speed=3.8; holding=false;
+  gameOverScreen.style.display='none'; menu.style.display='none'; canvas.style.display='block'; hud.style.display='flex';
+  getAc(); updateHud(); drawBg(); drawAll();
 }
-function updateHud(){ hud.innerHTML = `${player.name} - ${Math.floor(score)}m <span class="coin-hud">· ${coinsCollected}</span> ${!player.grounded && holding ? ' · flotando' : ''}`; }
+function updateHud(){ hudLeft.textContent=`${player.name} · ${Math.floor(score)}m`; hudRight.textContent=`Zombies: ${player.horde} · Monedas: ${coinsCollected}`; }
 function drawBg(){
-  const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,'#1a1a2e');grad.addColorStop(1,'#16213e');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,'#0a1a0a'); grad.addColorStop(1,'#1a1a1a');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
   const gy=H*(1-GROUND_RATIO);
-  ctx.fillStyle='#0f3460';ctx.fillRect(0,gy,W,H-gy); ctx.fillStyle='#e94560';ctx.fillRect(0,gy,W,4);
-  ctx.fillStyle='#1f2d45';ctx.beginPath();ctx.moveTo(0,gy);for(let i=0;i<=W;i+=40) ctx.lineTo(i,gy-30-Math.sin(i*0.01)*25-Math.sin(i*0.025)*15); ctx.lineTo(W,gy);ctx.fill();
-  // nubes
-  ctx.fillStyle='rgba(255,255,255,.08)'; for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse((W*0.3+i*W*0.35+score*0.5)%W, 80+i*40, 50,18,0,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#1f1f1f'; ctx.fillRect(0,gy,W,H-gy); ctx.fillStyle='#39ff14'; ctx.fillRect(0,gy,W,3);
+  // ciudad silhouette
+  ctx.fillStyle='#0d2812'; ctx.beginPath(); ctx.moveTo(0,gy);
+  for(let i=0;i<=W;i+=55){ ctx.lineTo(i, gy-22 - Math.sin(i*0.02)*10 - (i%110<50?18:0));} ctx.lineTo(W,gy); ctx.fill();
+  // luna
+  ctx.fillStyle='rgba(255,255,180,.9)'; ctx.beginPath(); ctx.arc(W*0.82, 70, 22,0,Math.PI*2); ctx.fill();
 }
-function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
-function drawPlayer(){
-  // sombra de flotar
-  if(!player.grounded && holding){ctx.fillStyle='rgba(255,215,0,.25)';ctx.beginPath();ctx.ellipse(player.x+player.w/2, player.y+player.h+6, 18,6,0,0,Math.PI*2);ctx.fill()}
-  ctx.fillStyle= player.grounded ? '#e94560' : '#ff6b81'; roundRect(player.x,player.y,player.w,player.h,8);ctx.fill();
-  if(player.jumps===1){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(player.x+player.w/2,player.y-7,4,0,Math.PI*2);ctx.fill()}
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(player.x+player.w*0.62,player.y+12,5,0,Math.PI*2);ctx.arc(player.x+player.w*0.85,player.y+12,5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(player.x+player.w*0.64,player.y+12,2.2,0,Math.PI*2);ctx.arc(player.x+player.w*0.87,player.y+12,2.2,0,Math.PI*2);ctx.fill();
-  if(!player.grounded && holding){ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='10px Arial';ctx.fillText('☁️', player.x+player.w+4, player.y+10)}
+function drawHorde(){
+  const baseX=player.x, baseY=player.y;
+  // dibuja la horda como zombies apilados
+  for(let i=0;i<player.horde;i++){
+    const col = i%4, row=Math.floor(i/4);
+    const x = baseX + col*9 - (player.horde>4?6:0);
+    const y = baseY - row*10;
+    const w=14,h=16;
+    ctx.fillStyle = i===0 ? '#39ff14' : '#2ecc71';
+    ctx.fillRect(x,y,w,h);
+    // cabeza
+    ctx.fillStyle='#c2f0b6'; ctx.fillRect(x+2,y-6,10,8);
+    // ojos rojos
+    ctx.fillStyle='#ff1a1a'; ctx.fillRect(x+3,y-3,2,2); ctx.fillRect(x+9,y-3,2,2);
+    // brazos
+    ctx.fillStyle='#2ecc71'; ctx.fillRect(x-2,y+4,3,7); ctx.fillRect(x+w-1,y+4,3,7);
+  }
+  // contador flotante
+  ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+  ctx.fillText(player.horde, baseX+18, baseY-2);
 }
-function drawObstacles(){ obstacles.forEach(o=>{ if(o.type==='spike'){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.moveTo(o.x,o.y+o.h);ctx.lineTo(o.x+o.w/2,o.y);ctx.lineTo(o.x+o.w,o.y+o.h);ctx.fill()} else {ctx.fillStyle='#0f3460';ctx.strokeStyle='#e94560';ctx.lineWidth=3;roundRect(o.x,o.y,o.w,o.h,6);ctx.fill();ctx.stroke();ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(o.x+o.w*0.32,o.y+o.h*0.32,4,0,Math.PI*2);ctx.arc(o.x+o.w*0.68,o.y+o.h*0.32,4,0,Math.PI*2);ctx.fill()}})}
-function drawCoins(){
-  coins.forEach(c=>{
-    if(c.collected) return;
-    ctx.save(); const bob=Math.sin(Date.now()*0.006 + c.x*0.01)*4;
-    ctx.fillStyle='#ffd700'; ctx.strokeStyle='#ff8c00'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.ellipse(c.x+c.w/2, c.y+c.h/2+bob, c.w/2, c.h/2,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle='#ff8c00'; ctx.font='bold 12px Arial'; ctx.textAlign='center'; ctx.fillText('★', c.x+c.w/2, c.y+c.h/2+4+bob);
-    ctx.restore();
-  })
-}
+function drawPedestrians(){ pedestrians.forEach(p=>{ if(p.eaten) return; ctx.fillStyle='#87cefa'; ctx.fillRect(p.x,p.y,p.w,p.h); ctx.fillStyle='#ffdbac'; ctx.fillRect(p.x+4,p.y-8,10,8); ctx.fillStyle='#000'; ctx.font='8px Arial'; ctx.fillText('!',p.x+7,p.y-2); });}
+function drawObstacles(){ obstacles.forEach(o=>{ if(o.type==='bomb'){ ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(o.x+o.w/2,o.y+o.h/2, o.w/2,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ff1a1a'; ctx.beginPath(); ctx.arc(o.x+o.w/2,o.y+o.h/2,3,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ffd700'; ctx.font='10px Arial'; ctx.fillText('B',o.x+o.w/2-4,o.y+o.h/2+3); } else { ctx.fillStyle='#555'; ctx.fillRect(o.x,o.y,o.w,o.h); ctx.fillStyle='#222'; ctx.fillRect(o.x+2,o.y+4, o.w-4,8); ctx.fillStyle='#e94560'; ctx.fillRect(o.x,o.y-4,o.w,4);} });}
+function drawCoins(){ coins.forEach(c=>{ if(c.collected) return; ctx.save(); const bob=Math.sin(Date.now()*0.006+c.x*0.01)*3; ctx.fillStyle='#ffd700'; ctx.strokeStyle='#ff8c00'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(c.x+c.w/2,c.y+c.h/2+bob,c.w/2,c.h/2,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle='#ff8c00'; ctx.font='bold 11px Arial'; ctx.textAlign='center'; ctx.fillText('$',c.x+c.w/2,c.y+c.h/2+4+bob); ctx.restore(); });}
+function drawAll(){ drawBg(); drawCoins(); drawPedestrians(); drawObstacles(); drawHorde(); }
+
 function update(){
   if(!gameRunning) return;
-  speed=3.6+obstaclesPassed*0.11;
-  // solo sumar metros en el suelo (estilo que pediste)
+  speed=3.8 + Math.floor(score/200)*0.22;
   if(player.grounded) score+=speed*0.18;
   updateHud();
-  // fisica con hover
+  // fisica hover
   if(!player.grounded){
-    const g = holding ? HOVER_GRAVITY : GRAVITY;
-    // si flotas, tambien frena la caida
-    if(holding && player.vy>2) player.vy=2;
-    player.vy+=g; player.y+=player.vy;
-    const gy=H*(1-GROUND_RATIO)-player.h;
-    if(player.y>=gy){player.y=gy;player.vy=0;player.grounded=true;player.jumps=0}
-    if(player.y<0){player.y=0;player.vy=0}
+    const g=holding?HOVER_GRAVITY:GRAVITY; if(holding&&player.vy>2) player.vy=2; player.vy+=g; player.y+=player.vy;
+    const gy=H*(1-GROUND_RATIO)-player.h; if(player.y>=gy){player.y=gy;player.vy=0;player.grounded=true;player.jumps=0} if(player.y<0){player.y=0;player.vy=0}
   }
-  // generar obstaculos
-  if(Math.random()<0.009){const type=Math.random()<0.3?'spike':'box';const gy=H*(1-GROUND_RATIO);const w=22+Math.random()*10;const h=type==='spike'?22:16+Math.random()*12;obstacles.push({x:W+10,y:gy-h,w:w,h:h,type:type,passed:false}); if(type==='box') obstaclesPassed++}
-  // monedas mas faciles: banda media, bien alcanzable con 1 salto
-  if(Math.random()<0.038){
-    const gy=H*(1-GROUND_RATIO);
-    const y = gy - 55 - Math.random()*45; // 55-100px sobre el suelo, no tan arriba
-    const x=W+10; coins.push({x:x,y:y,w:28,h:28,collected:false});
+  // spawn peatones (comestibles)
+  if(Math.random()<0.018){
+    const gy=H*(1-GROUND_RATIO); const h=20+Math.random()*8, w=16;
+    const y=gy-h; // en el suelo caminando
+    const cnt= 1 + (Math.random()<0.25?1:0); // a veces 2 juntos
+    for(let i=0;i<cnt;i++) pedestrians.push({x:W+10+i*20,y:y,w:w,h:h,eaten:false});
   }
-  obstacles.forEach(o=>{o.x-=speed; if(!o.passed&&o.x+o.w<player.x){o.passed=true; }});
+  // spawn obstaculos (bombas / muros)
+  if(Math.random()<0.010){
+    const gy=H*(1-GROUND_RATIO); const isBomb=Math.random()<0.45; const w=isBomb?22:28, h=isBomb?22:18+Math.random()*12;
+    obstacles.push({x:W+10,y:gy-h,w:w,h:h,type:isBomb?'bomb':'wall',passed:false});
+  }
+  // spawn monedas
+  if(Math.random()<0.035){
+    const gy=H*(1-GROUND_RATIO); const y=gy-55-Math.random()*45; coins.push({x:W+10,y:y,w:24,h:24,collected:false});
+  }
+  // mover
+  const spd=speed;
+  pedestrians.forEach(p=> p.x-=spd);
+  obstacles.forEach(o=>{o.x-=spd});
+  coins.forEach(c=> c.x-=spd);
+  // colision peatones -> comer y crecer horda
+  const pr=6;
+  pedestrians.forEach(p=>{
+    if(!p.eaten && player.x < p.x+p.w && player.x+player.w+ (player.horde*1.5) > p.x && player.y < p.y+p.h+10 && player.y+player.h > p.y){
+      p.eaten=true; player.horde += 1; score+=15; sndEat();
+      // efecto +1
+    }
+  });
+  // colision monedas
+  coins.forEach(c=>{
+    if(!c.collected && player.x-6 < c.x+c.w && player.x+player.w+6 > c.x && player.y-6 < c.y+c.h && player.y+player.h+6 > c.y){
+      c.collected=true; coinsCollected++; score+=10; sndCoin();
+    }
+  });
+  // colision obstaculos -> perder zombies, no muerte instantanea
+  for(const o of obstacles){
+    if(player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>o.y && player.y+pr<o.y+o.h){
+      o.x=-100; // remover
+      if(o.type==='bomb'){ player.horde = Math.max(0, player.horde-3); sndHit(); }
+      else { player.horde = Math.max(0, player.horde-1); sndHit(); }
+      if(player.horde<=0){ gameRunning=false; cancelAnimationFrame(animId); const best=saveRank(player.name,score); goScore.textContent=Math.floor(score)+' m'; goZombies.textContent='Horda final: '+player.horde; goCoins.textContent='Monedas: '+coinsCollected; renderRank(goRanking,player.name); renderRank(menuRanking,player.name); gameOverScreen.style.display='flex'; return; }
+    }
+  }
+  // limpiar
+  pedestrians=pedestrians.filter(p=>!p.eaten && p.x+p.w>-30);
   obstacles=obstacles.filter(o=>o.x+o.w>-40);
-  coins.forEach(c=>{c.x-=speed; // hitbox generosa +6px
-    const pad=8;
-    if(!c.collected && player.x-pad < c.x+c.w && player.x+player.w+pad > c.x && player.y-pad < c.y+c.h && player.y+player.h+pad > c.y){ c.collected=true; coinsCollected++; score+=10; playCoin(); }});
-  coins=coins.filter(c=> !c.collected && c.x+c.w>-30);
-  // colision obstaculos
-  const pr=10;
-  for(const o of obstacles){ if(player.x+player.w-pr>o.x&&player.x+pr<o.x+o.w&&player.y+player.h-pr>o.y&&player.y+pr<o.y+o.h){gameRunning=false;cancelAnimationFrame(animId);playHit();const best=saveScore(player.name, score);goName.textContent=player.name;goScore.textContent=Math.floor(score)+'m';goCoins.textContent=`${coinsCollected} monedas`;renderRanking(goRanking, player.name);renderRanking(menuRanking, player.name);gameOverScreen.style.display='flex';return}}
-  drawBg();drawCoins();drawObstacles();drawPlayer();
+  coins=coins.filter(c=>!c.collected && c.x+c.w>-30);
+  drawBg(); drawCoins(); drawPedestrians(); drawObstacles(); drawHorde();
 }
 function jump(){
   if(!gameRunning||!player) return;
   if(player.jumps>=MAX_JUMPS) return;
-  const d=player.jumps===1; player.vy=d?DOUBLE_JUMP_FORCE:JUMP_FORCE; player.grounded=false; player.jumps++; playJumpSound(d);
+  const d=player.jumps===1; player.vy=d?DOUBLE_JUMP:JUMP; player.grounded=false; player.jumps++; sndJump(d);
 }
-function startLoop(){function loop(){update();if(gameRunning) animId=requestAnimationFrame(loop)} loop()}
-function showMenu(){gameRunning=false;cancelAnimationFrame(animId);gameOverScreen.style.display='none';canvas.style.display='none';hud.style.display='none';menu.style.display='flex';renderRanking(menuRanking, nameInput.value.trim()||null)}
-playBtn.addEventListener('click',()=>{const n=nameInput.value.trim()||'Jugador';initGame(n);gameRunning=true;startLoop()});
-restartBtn.addEventListener('click',()=>{const n=goName.textContent||'Jugador';initGame(n);gameRunning=true;startLoop()});
-menuBtn.addEventListener('click', showMenu);
-// --- Controles hover: mantener presionado para flotar ---
+function startLoop(){ function loop(){update(); if(gameRunning) animId=requestAnimationFrame(loop)} loop()}
+function showMenu(){ gameRunning=false; cancelAnimationFrame(animId); gameOverScreen.style.display='none'; canvas.style.display='none'; hud.style.display='none'; menu.style.display='flex'; renderRank(menuRanking, nameInput.value.trim()||null); }
+
+playBtn.addEventListener('click',()=>{const n=nameInput.value.trim()||'Jugador'; init(n); gameRunning=true; startLoop()});
+restartBtn.addEventListener('click',()=>{const n=document.getElementById('goScore').textContent? (loadRank()[0]?.name||'Jugador') : 'Jugador'; const nn=document.getElementById('goZombies').textContent? player.name : 'Jugador'; init(player?player.name:'Jugador'); gameRunning=true; startLoop()});
+menuBtn.addEventListener('click',showMenu);
 function setHold(v){holding=v; if(gameRunning) updateHud();}
-// teclado: mantener presionado
-document.addEventListener('keydown',e=>{
-  if((e.code==='Space'||e.code==='ArrowUp') && gameRunning){
-    if(e.repeat) { setHold(true); return; }
-    jump(); setHold(true); e.preventDefault();
-  }
-});
-document.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp') setHold(false)});
-// canvas: tocar = salto, mantener = flotar
-let touchActive=false;
-canvas.addEventListener('pointerdown',e=>{e.preventDefault(); if(!gameRunning) return; touchActive=true; jump(); setHold(true); canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointerup',e=>{e.preventDefault(); touchActive=false; setHold(false);});
-canvas.addEventListener('pointercancel',()=>{touchActive=false; setHold(false);});
-canvas.addEventListener('pointerleave',()=>{ if(touchActive) setHold(false); });
-// fallback touch
-canvas.addEventListener('touchstart',e=>{e.preventDefault();},{passive:false});
+document.addEventListener('keydown',e=>{ if((e.code==='Space'||e.code==='ArrowUp')&&gameRunning){ if(e.repeat){setHold(true);return} jump(); setHold(true); e.preventDefault(); }});
+document.addEventListener('keyup',e=>{ if(e.code==='Space'||e.code==='ArrowUp') setHold(false);});
+let touchAct=false;
+canvas.addEventListener('pointerdown',e=>{e.preventDefault(); if(!gameRunning) return; touchAct=true; jump(); setHold(true); canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointerup',e=>{e.preventDefault(); touchAct=false; setHold(false);});
+canvas.addEventListener('pointercancel',()=>{touchAct=false; setHold(false);});
+canvas.addEventListener('pointerleave',()=>{if(touchAct) setHold(false);});
 </script>
 </body>
 </html>
