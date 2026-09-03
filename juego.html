@@ -205,6 +205,16 @@ function drawObstacles(){
       ctx.fillStyle='#ff6b00'; ctx.beginPath(); ctx.arc(o.x+o.w/2+4, y-6, 2.5+Math.sin(tick*0.6)*1,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#0a0a0a'; ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(o.x+o.w/2, y+o.h/2+4, o.w/2,0,Math.PI*2); ctx.fill(); ctx.stroke();
       ctx.fillStyle='#ff1a1a'; ctx.font='bold 10px Arial'; ctx.textAlign='center'; ctx.fillText('!',o.x+o.w/2, y+o.h/2+7); ctx.restore();
+    } else if(o.type==='aerial'){
+      const bob=Math.sin(tick*0.35+o.x*0.02)*5; const y=o.y+bob;
+      ctx.save();
+      // drone aereo con helices
+      ctx.fillStyle='#4a00b5'; ctx.fillRect(o.x,y,o.w,o.h);
+      ctx.fillStyle='#7a00ff'; ctx.fillRect(o.x+2,y+2,o.w-4,4);
+      ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(o.x+o.w/2, y, o.w*0.55,3,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#ff1a1a'; ctx.font='bold 9px Arial'; ctx.textAlign='center'; ctx.fillText('▲', o.x+o.w/2, y+o.h/2+3);
+      ctx.restore();
+      o._drawY=y; // guarda y con bob para colision
     } else {
       ctx.fillStyle='#3a3a3a'; ctx.fillRect(o.x,o.y,o.w,o.h);
       ctx.fillStyle='#39ff14'; ctx.shadowColor='#39ff14'; ctx.shadowBlur=6; ctx.fillRect(o.x,o.y-3,o.w,3); ctx.shadowBlur=0;
@@ -279,6 +289,11 @@ function update(){
     const gy=H*(1-GROUND_RATIO); const isBomb=Math.random()<0.45; const w=isBomb?22:28, h=isBomb?22:18+Math.random()*12;
     obstacles.push({x:W+10,y:gy-h,w:w,h:h,type:isBomb?'bomb':'wall'});
   }
+  if(Math.random()<0.006){
+    const gy=H*(1-GROUND_RATIO); const y=gy-75-Math.random()*70;
+    const w=28+Math.random()*12, h=14+Math.random()*8;
+    obstacles.push({x:W+10,y:y,w:w,h:h,type:'aerial'});
+  }
   if(Math.random()<0.035){
     const gy=H*(1-GROUND_RATIO); const y=gy-55-Math.random()*45; coins.push({x:W+10,y:y,w:24,h:24,collected:false});
   }
@@ -319,17 +334,27 @@ function update(){
       }
     });
   }
+  // cualquier zombie de la horda puede recoger monedas
+  const displayForCollect = Math.min(player.horde, 12);
   coins.forEach(c=>{
-    if(!c.collected && player.x-6 < c.x+c.w && player.x+player.w+6 > c.x && player.y-6 < c.y+c.h && player.y+player.h+6 > c.y){
+    if(c.collected) return;
+    let hit=false;
+    for(let i=0;i<displayForCollect;i++){
+      const col=i%4, row=Math.floor(i/4);
+      const zx=player.x+col*11-(displayForCollect>6?8:0);
+      const zy=player.y-row*12;
+      if(zx-8 < c.x+c.w && zx+30 > c.x && zy-14 < c.y+c.h && zy+26 > c.y){ hit=true; break; }
+    }
+    if(hit){
       c.collected=true; coinsCollected++; score+=10; sndCoin();
       particles.push({x:c.x,y:c.y,vy:-1.8,vx:0,life:1,text:'+10',color:'#ffd700'});
     }
   });
   const pr=6;
   for(const o of obstacles){
-    // si dash/gigante/estrella, no pierdes
     const inv = player.giant>0 || player.star>0 || player.dashing>0;
-    if(player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>o.y && player.y+pr<o.y+o.h){
+    const oy = o._drawY!==undefined ? o._drawY : o.y;
+    if(player.x+player.w-pr>o.x && player.x+pr<o.x+o.w && player.y+player.h-pr>oy && player.y+pr<oy+o.h){
       if(inv){
         o.x=-100; score+=5; particles.push({x:o.x,y:o.y,vy:-1,vx:0,life:1,text:'BLOCK!',color:'#39ff14'});
         continue;
@@ -356,12 +381,17 @@ function update(){
 }
 function drawHorde(){
   const baseX=player.x, baseY=player.y; const inAir=!player.grounded;
-  for(let i=0;i<player.horde;i++){
+  const display = Math.min(player.horde, 12); // limite visual para no llenar pantalla
+  for(let i=0;i<display;i++){
     const col=i%4, row=Math.floor(i/4);
-    const x=baseX+col*11-(player.horde>6?8:0)+Math.sin(tick*0.08+i)*0.6;
+    const x=baseX+col*11-(display>6?8:0)+Math.sin(tick*0.08+i)*0.6;
     const y=baseY-row*12;
     const phase=tick*0.55+i*0.9;
     drawZombieSprite(x,y,phase,i===0,inAir,holding);
+  }
+  if(player.horde>12){
+    ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(baseX+14, baseY-38, 28,14);
+    ctx.fillStyle='#39ff14'; ctx.font='bold 10px Arial'; ctx.textAlign='center'; ctx.fillText(`+${player.horde-12}`, baseX+28, baseY-28);
   }
 }
 function jump(){
